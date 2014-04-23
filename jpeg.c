@@ -603,8 +603,8 @@ void setCameraSettings (COMPONENT* camera){
   if (!CAM_WHITE_BALANCE){
     OMX_CONFIG_CUSTOMAWBGAINSTYPE whiteBalanceGains;
     OMX_INIT_STRUCTURE (whiteBalanceGains);
-    whiteBalanceGains.xGainR = CAM_WHITE_BALANCE_RED_GAIN*65536;
-    whiteBalanceGains.xGainB = CAM_WHITE_BALANCE_BLUE_GAIN*65536;
+    whiteBalanceGains.xGainR = (OMX_U32)(CAM_WHITE_BALANCE_RED_GAIN*65536);
+    whiteBalanceGains.xGainB = (OMX_U32)(CAM_WHITE_BALANCE_BLUE_GAIN*65536);
     if (error = OMX_SetConfig (camera->handle, OMX_IndexConfigCustomAwbGains,
         &whiteBalanceGains)){
       printf ("ERROR: OMX_SetConfig: %s\n", dump_OMX_ERRORTYPE (error));
