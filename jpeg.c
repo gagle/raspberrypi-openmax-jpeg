@@ -788,6 +788,10 @@ void set_jpeg_settings (component_t* encoder){
   }
 }
 
+int round_up (int value, int divisor){
+  return (divisor + value - 1) & ~(divisor - 1);
+}
+
 int main (){
   OMX_ERRORTYPE error;
   OMX_BUFFERHEADERTYPE* encoder_output_buffer;
@@ -861,8 +865,9 @@ int main (){
   port_def.format.image.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.image.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
   //Stride is byte-per-pixel*width, YUV has 1 byte per pixel, so the stride is
-  //the width. See mmal/util/mmal_util.c, mmal_encoding_width_to_stride()
-  port_def.format.image.nStride = CAM_WIDTH;
+  //the width (rounded up to the nearest multiple of 16).
+  //See mmal/util/mmal_util.c, mmal_encoding_width_to_stride()
+  port_def.format.image.nStride = round_up (CAM_WIDTH, 16);
   if ((error = OMX_SetParameter (camera.handle, OMX_IndexParamPortDefinition,
       &port_def))){
     fprintf (stderr, "error: OMX_SetParameter: %s\n",
