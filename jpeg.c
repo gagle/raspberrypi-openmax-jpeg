@@ -85,10 +85,10 @@ AWB (auto white balance) algorithms.
 #define CAM_WHITE_BALANCE_RED_GAIN 0.1 //0.001 .. 7.999
 #define CAM_WHITE_BALANCE_BLUE_GAIN 0.1 //0.001 .. 7.999
 #define CAM_IMAGE_FILTER OMX_ImageFilterNone
-#define CAM_ROI_TOP 0.5 //0.0 .. 1.0
-#define CAM_ROI_LEFT 0.5 //0.0 .. 1.0
-#define CAM_ROI_WIDTH 0.5 //0.0 .. 1.0
-#define CAM_ROI_HEIGHT 0.5 //0.0 .. 1.0
+#define CAM_ROI_TOP 0.0 //0.0 .. 1.0
+#define CAM_ROI_LEFT 0.0 //0.0 .. 1.0
+#define CAM_ROI_WIDTH 1.0 //0.0 .. 1.0
+#define CAM_ROI_HEIGHT 1.0 //0.0 .. 1.0
 
 /*
 Possible values:
