@@ -19,7 +19,7 @@ Very quick OpenMAX IL explanation:
   functions are synchronous and the non-blocking are asynchronous. Being
   asynchronous means that the function returns immediately but the result is
   returned in a later time, so you need to wait until you receive an event. This
-  example  ses two non-blocking functions: OMX_SendCommand and
+  example	uses two non-blocking functions: OMX_SendCommand and
   OMX_FillThisBuffer.
 
 Note: The camera component has two video ports: "preview" and "video". The
@@ -878,7 +878,7 @@ int main (){
         dump_OMX_ERRORTYPE (error));
     exit (1);
   }
-  port_def.format.image.nFrameWidth  = CAM_WIDTH;
+  port_def.format.image.nFrameWidth	= CAM_WIDTH;
   port_def.format.image.nFrameHeight = CAM_HEIGHT;
   port_def.format.image.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.image.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
@@ -893,16 +893,19 @@ int main (){
     exit (1);
   }
   
-  //Configure preview port at capture resolution (better performance)
-  //1920x1080 15fps
+  //Configure preview port
+  //In theory the fastest resolution and framerate are 1920x1080 @15fps because
+  //these are the default settings for the preview port, so the frames don't
+  //need to be resized. In practice, this is not true. The fastest way to
+  //produce stills is setting the lowest resolution, that is, 640x480 @15fps.
+  //The difference between 1920x1080 @15fps and 640x480 @15fps is a speed boost
+  //of ~4%, from ~1083ms to ~1039ms
   port_def.nPortIndex = 70;
-  //omxcam_round (1920, 32) -> 1920
-  //omxcam_round (1080, 16) -> 1088
-  port_def.format.video.nFrameWidth = 1920;
-  port_def.format.video.nFrameHeight = 1088;
+  port_def.format.video.nFrameWidth = 640;
+  port_def.format.video.nFrameHeight = 480;
   port_def.format.video.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
-  //15fps, 15 << 16 -> 983040
+  //15 << 16 -> 983040
   port_def.format.video.xFramerate = 983040;
   port_def.format.video.nStride = CAM_WIDTH;
   if ((error = OMX_SetParameter (camera.handle, OMX_IndexParamPortDefinition,
