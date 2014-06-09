@@ -250,9 +250,9 @@ void dump_OMX_PARAM_PORTDEFINITIONTYPE (
     case OMX_PortDomainAudio:
       strcpy (domain, "OMX_PortDomainAudio");
       sprintf (domain_info,
-          "	   cMIMEType: %s\n"
-          "	   bFlagErrorConcealment: %s\n"
-          "	   eEncoding: %s\n",
+          "    cMIMEType: %s\n"
+          "    bFlagErrorConcealment: %s\n"
+          "    eEncoding: %s\n",
           port->format.video.cMIMEType,
           port->format.image.bFlagErrorConcealment ? "true" : "false",
           dump_OMX_AUDIO_CODINGTYPE (
