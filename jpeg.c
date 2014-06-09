@@ -878,7 +878,7 @@ int main (){
         dump_OMX_ERRORTYPE (error));
     exit (1);
   }
-  port_def.format.image.nFrameWidth	= CAM_WIDTH;
+  port_def.format.image.nFrameWidth = CAM_WIDTH;
   port_def.format.image.nFrameHeight = CAM_HEIGHT;
   port_def.format.image.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.image.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
