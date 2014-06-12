@@ -907,7 +907,7 @@ int main (){
   port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
   //15 << 16 -> 983040
   port_def.format.video.xFramerate = 983040;
-  port_def.format.video.nStride = CAM_WIDTH;
+  port_def.format.video.nStride = 640;
   if ((error = OMX_SetParameter (camera.handle, OMX_IndexParamPortDefinition,
       &port_def))){
     fprintf (stderr, "error: OMX_SetParameter - "
