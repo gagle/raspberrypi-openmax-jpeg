@@ -67,13 +67,14 @@ AWB (auto white balance) algorithms.
 #define CAM_BRIGHTNESS 50 //0 .. 100
 #define CAM_SATURATION 0 //-100 .. 100
 #define CAM_SHUTTER_SPEED_AUTO OMX_TRUE
-#define CAM_SHUTTER_SPEED 1.0/8.0
+//100*(1/8) = 125
+#define CAM_SHUTTER_SPEED 125 //0 ..
 #define CAM_ISO_AUTO OMX_TRUE
 #define CAM_ISO 100 //100 .. 800
 #define CAM_EXPOSURE OMX_ExposureControlAuto
-#define CAM_EXPOSURE_COMPENSATION 0 //-10 .. 10
+#define CAM_EXPOSURE_COMPENSATION 0 //-24 .. 24
 #define CAM_MIRROR OMX_MirrorNone
-#define CAM_ROTATION 0.0 //0.0 90.0 180.0 270.0
+#define CAM_ROTATION 0 //0 90 180 270
 #define CAM_COLOR_ENABLE OMX_FALSE
 #define CAM_COLOR_U 128 //0 .. 255
 #define CAM_COLOR_V 128 //0 .. 255
@@ -588,8 +589,7 @@ void set_camera_settings (component_t* camera){
   OMX_INIT_STRUCTURE (exposure_value_st);
   exposure_value_st.nPortIndex = OMX_ALL;
   exposure_value_st.eMetering = CAM_METERING;
-  exposure_value_st.xEVCompensation =
-      (CAM_EXPOSURE_COMPENSATION << 16)/6.0;
+  exposure_value_st.xEVCompensation = (CAM_EXPOSURE_COMPENSATION << 16)/6;
   exposure_value_st.nShutterSpeedMsec = CAM_SHUTTER_SPEED*1e6;
   exposure_value_st.bAutoShutterSpeed = CAM_SHUTTER_SPEED_AUTO;
   exposure_value_st.nSensitivity = CAM_ISO;
@@ -661,7 +661,7 @@ void set_camera_settings (component_t* camera){
   //Mirror
   OMX_CONFIG_MIRRORTYPE mirror_st;
   OMX_INIT_STRUCTURE (mirror_st);
-  mirror_st.nPortIndex = 71;
+  mirror_st.nPortIndex = 72;
   mirror_st.eMirror = CAM_MIRROR;
   if ((error = OMX_SetConfig (camera->handle, OMX_IndexConfigCommonMirror,
       &mirror_st))){
@@ -672,7 +672,7 @@ void set_camera_settings (component_t* camera){
   //Rotation
   OMX_CONFIG_ROTATIONTYPE rotation_st;
   OMX_INIT_STRUCTURE (rotation_st);
-  rotation_st.nPortIndex = 71;
+  rotation_st.nPortIndex = 72;
   rotation_st.nRotation = CAM_ROTATION;
   if ((error = OMX_SetConfig (camera->handle, OMX_IndexConfigCommonRotate,
       &rotation_st))){
