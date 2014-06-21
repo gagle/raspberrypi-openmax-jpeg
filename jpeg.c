@@ -589,8 +589,8 @@ void set_camera_settings (component_t* camera){
   exposure_value_st.nPortIndex = OMX_ALL;
   exposure_value_st.eMetering = CAM_METERING;
   exposure_value_st.xEVCompensation =
-      (OMX_S32)((CAM_EXPOSURE_COMPENSATION<<16)/6.0);
-  exposure_value_st.nShutterSpeedMsec = (OMX_U32)((CAM_SHUTTER_SPEED)*1e6);
+      (CAM_EXPOSURE_COMPENSATION << 16)/6.0;
+  exposure_value_st.nShutterSpeedMsec = CAM_SHUTTER_SPEED*1e6;
   exposure_value_st.bAutoShutterSpeed = CAM_SHUTTER_SPEED_AUTO;
   exposure_value_st.nSensitivity = CAM_ISO;
   exposure_value_st.bAutoSensitivity = CAM_ISO_AUTO;
