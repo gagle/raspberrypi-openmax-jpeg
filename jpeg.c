@@ -50,12 +50,13 @@ AWB (auto white balance) algorithms.
 
 #define FILENAME "still.jpg"
 
-#define JPEG_QUALITY 100 //1 .. 100
+#define JPEG_QUALITY 75 //1 .. 100
 #define JPEG_EXIF_DISABLE OMX_FALSE
 #define JPEG_IJG_ENABLE OMX_FALSE
 #define JPEG_THUMBNAIL_ENABLE OMX_TRUE
-#define JPEG_THUMBNAIL_WIDTH 64
-#define JPEG_THUMBNAIL_HEIGHT 48
+#define JPEG_THUMBNAIL_WIDTH 64 //0 .. 1024
+#define JPEG_THUMBNAIL_HEIGHT 48 //0 .. 1024
+#define JPEG_PREVIEW OMX_FALSE
 
 #define RAW_BAYER OMX_FALSE
 
@@ -67,8 +68,8 @@ AWB (auto white balance) algorithms.
 #define CAM_BRIGHTNESS 50 //0 .. 100
 #define CAM_SATURATION 0 //-100 .. 100
 #define CAM_SHUTTER_SPEED_AUTO OMX_TRUE
-//1000*(1/8) = 125
-#define CAM_SHUTTER_SPEED 125 //0 ..
+//In microseconds, (1/8)*1e6
+#define CAM_SHUTTER_SPEED 125000 //1 ..
 #define CAM_ISO_AUTO OMX_TRUE
 #define CAM_ISO 100 //100 .. 800
 #define CAM_EXPOSURE OMX_ExposureControlAuto
@@ -590,7 +591,7 @@ void set_camera_settings (component_t* camera){
   exposure_value_st.nPortIndex = OMX_ALL;
   exposure_value_st.eMetering = CAM_METERING;
   exposure_value_st.xEVCompensation = (CAM_EXPOSURE_COMPENSATION << 16)/6;
-  exposure_value_st.nShutterSpeedMsec = CAM_SHUTTER_SPEED*1e6;
+  exposure_value_st.nShutterSpeedMsec = CAM_SHUTTER_SPEED;
   exposure_value_st.bAutoShutterSpeed = CAM_SHUTTER_SPEED_AUTO;
   exposure_value_st.nSensitivity = CAM_ISO;
   exposure_value_st.bAutoSensitivity = CAM_ISO_AUTO;
@@ -762,7 +763,7 @@ void set_jpeg_settings (component_t* encoder){
   OMX_PARAM_BRCMTHUMBNAILTYPE thumbnail;
   OMX_INIT_STRUCTURE (thumbnail);
   thumbnail.bEnable = JPEG_THUMBNAIL_ENABLE;
-  thumbnail.bUsePreview = OMX_FALSE;
+  thumbnail.bUsePreview = JPEG_PREVIEW;
   thumbnail.nWidth = JPEG_THUMBNAIL_WIDTH;
   thumbnail.nHeight = JPEG_THUMBNAIL_HEIGHT;
   if ((error = OMX_SetParameter (encoder->handle, OMX_IndexParamBrcmThumbnail,
@@ -893,19 +894,20 @@ int main (){
   }
   
   //Configure preview port
-  //In theory the fastest resolution and framerate are 1920x1080 @15fps because
+  //In theory the fastest resolution and framerate are 1920x1080 @30fps because
   //these are the default settings for the preview port, so the frames don't
   //need to be resized. In practice, this is not true. The fastest way to
-  //produce stills is setting the lowest resolution, that is, 640x480 @15fps.
-  //The difference between 1920x1080 @15fps and 640x480 @15fps is a speed boost
+  //produce stills is setting the lowest resolution, that is, 640x480 @30fps.
+  //The difference between 1920x1080 @30fps and 640x480 @30fps is a speed boost
   //of ~4%, from ~1083ms to ~1039ms
   port_def.nPortIndex = 70;
   port_def.format.video.nFrameWidth = 640;
   port_def.format.video.nFrameHeight = 480;
   port_def.format.video.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
-  //15 << 16 -> 983040
-  port_def.format.video.xFramerate = 983040;
+  //Setting the framerate to 0 unblocks the shutter speed from 66ms to 772ms
+  //The higher the speed, the higher the capture time
+  port_def.format.video.xFramerate = 0;
   port_def.format.video.nStride = 640;
   if ((error = OMX_SetParameter (camera.handle, OMX_IndexParamPortDefinition,
       &port_def))){
