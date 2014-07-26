@@ -14,7 +14,7 @@ Very quick OpenMAX IL explanation:
   OMX_AllocateBuffer() and free them with OMX_FreeBuffer().
 - The components have states.
 - There are at least two threads: the thread that uses the application (CPU) and
-  the	thread that is used internally by OMX to execute the components (GPU).
+  the thread that is used internally by OMX to execute the components (GPU).
 - There are two types of functions: blocking and non-blocking. The blocking
   functions are synchronous and the non-blocking are asynchronous. Being
   asynchronous means that the function returns immediately but the result is
@@ -23,7 +23,7 @@ Very quick OpenMAX IL explanation:
   OMX_FillThisBuffer.
 
 Note: The camera component has two video ports: "preview" and "video". The
-"preview" port must be enabled even if you don't need it (tunnel it to the
+"preview" port must be enabled even if you're not using it (tunnel it to the
 null_sink component) because it is used to run AGC (automatic gain control) and
 AWB (auto white balance) algorithms.
 */
