@@ -50,12 +50,13 @@ AWB (auto white balance) algorithms.
 
 #define FILENAME "still.jpg"
 
-#define JPEG_QUALITY 100 //1 .. 100
+#define JPEG_QUALITY 75 //1 .. 100
 #define JPEG_EXIF_DISABLE OMX_FALSE
 #define JPEG_IJG_ENABLE OMX_FALSE
 #define JPEG_THUMBNAIL_ENABLE OMX_TRUE
-#define JPEG_THUMBNAIL_WIDTH 64
-#define JPEG_THUMBNAIL_HEIGHT 48
+#define JPEG_THUMBNAIL_WIDTH 64 //0 .. 1024
+#define JPEG_THUMBNAIL_HEIGHT 48 //0 .. 1024
+#define JPEG_PREVIEW OMX_FALSE
 
 #define RAW_BAYER OMX_FALSE
 
@@ -67,13 +68,14 @@ AWB (auto white balance) algorithms.
 #define CAM_BRIGHTNESS 50 //0 .. 100
 #define CAM_SATURATION 0 //-100 .. 100
 #define CAM_SHUTTER_SPEED_AUTO OMX_TRUE
-#define CAM_SHUTTER_SPEED 1.0/8.0
+//In microseconds, (1/8)*1e6
+#define CAM_SHUTTER_SPEED 125000 //1 ..
 #define CAM_ISO_AUTO OMX_TRUE
 #define CAM_ISO 100 //100 .. 800
 #define CAM_EXPOSURE OMX_ExposureControlAuto
-#define CAM_EXPOSURE_COMPENSATION 0 //-10 .. 10
+#define CAM_EXPOSURE_COMPENSATION 0 //-24 .. 24
 #define CAM_MIRROR OMX_MirrorNone
-#define CAM_ROTATION 0.0 //0.0 90.0 180.0 270.0
+#define CAM_ROTATION 0 //0 90 180 270
 #define CAM_COLOR_ENABLE OMX_FALSE
 #define CAM_COLOR_U 128 //0 .. 255
 #define CAM_COLOR_V 128 //0 .. 255
@@ -82,13 +84,13 @@ AWB (auto white balance) algorithms.
 #define CAM_METERING OMX_MeteringModeAverage
 #define CAM_WHITE_BALANCE OMX_WhiteBalControlAuto
 //The gains are used if the white balance is set to off
-#define CAM_WHITE_BALANCE_RED_GAIN 0.1 //0.001 .. 7.999
-#define CAM_WHITE_BALANCE_BLUE_GAIN 0.1 //0.001 .. 7.999
+#define CAM_WHITE_BALANCE_RED_GAIN 1000 //0 ..
+#define CAM_WHITE_BALANCE_BLUE_GAIN 1000 //0 ..
 #define CAM_IMAGE_FILTER OMX_ImageFilterNone
-#define CAM_ROI_TOP 0.0 //0.0 .. 1.0
-#define CAM_ROI_LEFT 0.0 //0.0 .. 1.0
-#define CAM_ROI_WIDTH 1.0 //0.0 .. 1.0
-#define CAM_ROI_HEIGHT 1.0 //0.0 .. 1.0
+#define CAM_ROI_TOP 0 //0 .. 100
+#define CAM_ROI_LEFT 0 //0 .. 100
+#define CAM_ROI_WIDTH 100 //0 .. 100
+#define CAM_ROI_HEIGHT 100 //0 .. 100
 
 /*
 Possible values:
@@ -588,9 +590,8 @@ void set_camera_settings (component_t* camera){
   OMX_INIT_STRUCTURE (exposure_value_st);
   exposure_value_st.nPortIndex = OMX_ALL;
   exposure_value_st.eMetering = CAM_METERING;
-  exposure_value_st.xEVCompensation =
-      (OMX_S32)((CAM_EXPOSURE_COMPENSATION<<16)/6.0);
-  exposure_value_st.nShutterSpeedMsec = (OMX_U32)((CAM_SHUTTER_SPEED)*1e6);
+  exposure_value_st.xEVCompensation = (CAM_EXPOSURE_COMPENSATION << 16)/6;
+  exposure_value_st.nShutterSpeedMsec = CAM_SHUTTER_SPEED;
   exposure_value_st.bAutoShutterSpeed = CAM_SHUTTER_SPEED_AUTO;
   exposure_value_st.nSensitivity = CAM_ISO;
   exposure_value_st.bAutoSensitivity = CAM_ISO_AUTO;
@@ -637,9 +638,8 @@ void set_camera_settings (component_t* camera){
   if (!CAM_WHITE_BALANCE){
     OMX_CONFIG_CUSTOMAWBGAINSTYPE white_balance_gains_st;
     OMX_INIT_STRUCTURE (white_balance_gains_st);
-    white_balance_gains_st.xGainR = (OMX_U32)(CAM_WHITE_BALANCE_RED_GAIN*65536);
-    white_balance_gains_st.xGainB =
-        (OMX_U32)(CAM_WHITE_BALANCE_BLUE_GAIN*65536);
+    white_balance_gains_st.xGainR = (CAM_WHITE_BALANCE_RED_GAIN << 16)/1000;
+    white_balance_gains_st.xGainB = (CAM_WHITE_BALANCE_BLUE_GAIN << 16)/1000;
     if ((error = OMX_SetConfig (camera->handle, OMX_IndexConfigCustomAwbGains,
         &white_balance_gains_st))){
       fprintf (stderr, "error: OMX_SetConfig: %s\n",
@@ -662,7 +662,7 @@ void set_camera_settings (component_t* camera){
   //Mirror
   OMX_CONFIG_MIRRORTYPE mirror_st;
   OMX_INIT_STRUCTURE (mirror_st);
-  mirror_st.nPortIndex = 71;
+  mirror_st.nPortIndex = 72;
   mirror_st.eMirror = CAM_MIRROR;
   if ((error = OMX_SetConfig (camera->handle, OMX_IndexConfigCommonMirror,
       &mirror_st))){
@@ -673,7 +673,7 @@ void set_camera_settings (component_t* camera){
   //Rotation
   OMX_CONFIG_ROTATIONTYPE rotation_st;
   OMX_INIT_STRUCTURE (rotation_st);
-  rotation_st.nPortIndex = 71;
+  rotation_st.nPortIndex = 72;
   rotation_st.nRotation = CAM_ROTATION;
   if ((error = OMX_SetConfig (camera->handle, OMX_IndexConfigCommonRotate,
       &rotation_st))){
@@ -708,10 +708,10 @@ void set_camera_settings (component_t* camera){
   OMX_CONFIG_INPUTCROPTYPE roi;
   OMX_INIT_STRUCTURE (roi);
   roi.nPortIndex = OMX_ALL;
-  roi.xLeft = (OMX_U32)(CAM_ROI_LEFT*65536);
-  roi.xTop = (OMX_U32)(CAM_ROI_TOP*65536);
-  roi.xWidth = (OMX_U32)(CAM_ROI_WIDTH*65536);
-  roi.xHeight = (OMX_U32)(CAM_ROI_HEIGHT*65536);
+  roi.xLeft = (CAM_ROI_LEFT << 16)/100;
+  roi.xTop = (CAM_ROI_TOP << 16)/100;
+  roi.xWidth = (CAM_ROI_WIDTH << 16)/100;
+  roi.xHeight = (CAM_ROI_HEIGHT << 16)/100;
   if ((error = OMX_SetConfig (camera->handle,
       OMX_IndexConfigInputCropPercentages, &roi))){
     fprintf (stderr, "error: OMX_SetConfig: %s\n", dump_OMX_ERRORTYPE (error));
@@ -763,7 +763,7 @@ void set_jpeg_settings (component_t* encoder){
   OMX_PARAM_BRCMTHUMBNAILTYPE thumbnail;
   OMX_INIT_STRUCTURE (thumbnail);
   thumbnail.bEnable = JPEG_THUMBNAIL_ENABLE;
-  thumbnail.bUsePreview = OMX_FALSE;
+  thumbnail.bUsePreview = JPEG_PREVIEW;
   thumbnail.nWidth = JPEG_THUMBNAIL_WIDTH;
   thumbnail.nHeight = JPEG_THUMBNAIL_HEIGHT;
   if ((error = OMX_SetParameter (encoder->handle, OMX_IndexParamBrcmThumbnail,
@@ -894,20 +894,21 @@ int main (){
   }
   
   //Configure preview port
-  //In theory the fastest resolution and framerate are 1920x1080 @15fps because
+  //In theory the fastest resolution and framerate are 1920x1080 @30fps because
   //these are the default settings for the preview port, so the frames don't
   //need to be resized. In practice, this is not true. The fastest way to
-  //produce stills is setting the lowest resolution, that is, 640x480 @15fps.
-  //The difference between 1920x1080 @15fps and 640x480 @15fps is a speed boost
+  //produce stills is setting the lowest resolution, that is, 640x480 @30fps.
+  //The difference between 1920x1080 @30fps and 640x480 @30fps is a speed boost
   //of ~4%, from ~1083ms to ~1039ms
   port_def.nPortIndex = 70;
   port_def.format.video.nFrameWidth = 640;
   port_def.format.video.nFrameHeight = 480;
   port_def.format.video.eCompressionFormat = OMX_IMAGE_CodingUnused;
   port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
-  //15 << 16 -> 983040
-  port_def.format.video.xFramerate = 983040;
-  port_def.format.video.nStride = CAM_WIDTH;
+  //Setting the framerate to 0 unblocks the shutter speed from 66ms to 772ms
+  //The higher the speed, the higher the capture time
+  port_def.format.video.xFramerate = 0;
+  port_def.format.video.nStride = 640;
   if ((error = OMX_SetParameter (camera.handle, OMX_IndexParamPortDefinition,
       &port_def))){
     fprintf (stderr, "error: OMX_SetParameter - "
