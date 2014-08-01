@@ -91,6 +91,7 @@ AWB (auto white balance) algorithms.
 #define CAM_ROI_LEFT 0 //0 .. 100
 #define CAM_ROI_WIDTH 100 //0 .. 100
 #define CAM_ROI_HEIGHT 100 //0 .. 100
+#define CAM_DRC OMX_DynRangeExpOff
 
 /*
 Possible values:
@@ -161,6 +162,12 @@ CAM_WHITE_BALANCE
   OMX_WhiteBalControlIncandescent
   OMX_WhiteBalControlFlash
   OMX_WhiteBalControlHorizon
+
+CAM_DRC
+  OMX_DynRangeExpOff
+  OMX_DynRangeExpLow
+  OMX_DynRangeExpMedium
+  OMX_DynRangeExpHigh
 */
 
 //Data of each component
@@ -705,15 +712,25 @@ void set_camera_settings (component_t* camera){
   }
   
   //ROI
-  OMX_CONFIG_INPUTCROPTYPE roi;
-  OMX_INIT_STRUCTURE (roi);
-  roi.nPortIndex = OMX_ALL;
-  roi.xLeft = (CAM_ROI_LEFT << 16)/100;
-  roi.xTop = (CAM_ROI_TOP << 16)/100;
-  roi.xWidth = (CAM_ROI_WIDTH << 16)/100;
-  roi.xHeight = (CAM_ROI_HEIGHT << 16)/100;
+  OMX_CONFIG_INPUTCROPTYPE roi_st;
+  OMX_INIT_STRUCTURE (roi_st);
+  roi_st.nPortIndex = OMX_ALL;
+  roi_st.xLeft = (CAM_ROI_LEFT << 16)/100;
+  roi_st.xTop = (CAM_ROI_TOP << 16)/100;
+  roi_st.xWidth = (CAM_ROI_WIDTH << 16)/100;
+  roi_st.xHeight = (CAM_ROI_HEIGHT << 16)/100;
   if ((error = OMX_SetConfig (camera->handle,
-      OMX_IndexConfigInputCropPercentages, &roi))){
+      OMX_IndexConfigInputCropPercentages, &roi_st))){
+    fprintf (stderr, "error: OMX_SetConfig: %s\n", dump_OMX_ERRORTYPE (error));
+    exit (1);
+  }
+  
+  //DRC
+  OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drc_st;
+  OMX_INIT_STRUCTURE (drc_st);
+  drc_st.eMode = CAM_DRC;
+  if ((error = OMX_SetConfig (camera->handle,
+      OMX_IndexConfigDynamicRangeExpansion, &drc_st))){
     fprintf (stderr, "error: OMX_SetConfig: %s\n", dump_OMX_ERRORTYPE (error));
     exit (1);
   }
